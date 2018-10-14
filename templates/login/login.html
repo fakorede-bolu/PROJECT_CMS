@@ -1,0 +1,33 @@
+<div class="card card-login mx-auto mt-5 w-50">
+    <div class="card-header text-center font-weight-bold">Login</div>
+
+    <div class="card-body align-content-md-center">
+        <form id="login-form">
+            <!-- {{#if error}}
+                <div class="alert alert-danger">
+                    {{error}}
+                </div>
+            {{/if}} -->
+            <div class="form-group">
+                <label for="exampleInputEmail1">Email address</label>
+                <input name="email" class="form-control" id="InputEmail" type="email" aria-describedby="emailHelp" placeholder="Enter email">
+            </div>
+            <div class="form-group">
+                <label for="exampleInputPassword1">Password</label>
+                <input name="password" class="form-control" id="InputPassword" type="password" placeholder="Password">
+            </div>
+            <div class="form-group">
+                <div class="form-check">
+                    <label class="form-check-label">
+                        <input class="form-check-input" type="checkbox"> Remember Password</label>
+                </div>
+            </div>
+            <input type="submit" class="btn btn-primary btn-block" id="loginBtn" value="Submit"/>
+        </form>
+        <div class="text-center">
+            <a class="d-block small mt-3" href="/register">Register an Account</a>
+            <a class="d-block small" href="forgot-password.html">Forgot Password?</a>
+            <a class="d-block small" href="/">Home Page?</a>
+        </div>
+    </div>
+</div>

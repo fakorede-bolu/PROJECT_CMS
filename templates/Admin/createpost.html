@@ -1,0 +1,54 @@
+<div class="w-75 mx-auto">
+    <h2 class="w-75 mx-auto">Create Post</h2>
+    
+    <form enctype="multipart/form-data" class="w-75 mx-auto" id ="post-form">
+    
+        <div class="form-group">
+    
+            <label for="title" >Title</label>
+    
+            <input type="text" name="title" class="form-control" id="title" placeholder="Enter Post Title" required>
+    
+        </div>
+        
+
+        <div class="form-group">
+        
+            <label for="file">Post Image</label>
+        
+            <input type="file" name="file" class="form-control" id="file" placeholder="Enter Post Title">
+
+            <img src="" alt="image-preview" id="img-preview" class="w-25 h-25">
+        
+        </div>
+    
+        <div class="form-group">
+    
+            <label for="status">Status</label>
+    
+            <select name="status" id="status" class="form-control">
+    
+                <option value="public">Public</option>
+                <option value="private">Private</option>
+                <option value="draft">Draft</option>
+    
+            </select>
+    
+        </div>
+    
+        <div class="form-group">
+    
+            <input type="checkbox" name="comments" id="allowComments" class="form-check-label">
+            <label for="comments">Allow Comments</label>
+    
+        </div>
+    
+        <div class="form-group">
+            <textarea cols="30" rows="10" class="form-control" id="text-body" placeholder="Enter your Post! lets write something awesome" required></textarea>
+    
+        </div>
+    
+    
+        <button type="submit" class="btn btn-primary">submit</button>
+    </form>
+</div>
