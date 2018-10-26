@@ -5,22 +5,25 @@ const database = {};
 database.User = {
     validator: {
         $and: [{
-            name: {
+            firstName: {
                 $type: "string",
-                $exist: true
+                $exists: true
+
+            },
+            lastName: {
+                $type: "string",
+                $exists: true
 
             },
             email: {
                 $type: "string",
-                $exist: true
+                $exists: true
             },
             password: {
                 $type: "string",
-                $exist: true
+                $exists: true
             }
-        }],
-            
-
+        }]
     }
 }
 
@@ -29,27 +32,35 @@ database.Post = {
         
         title: {
             $type: "string",
-            $exist: true
+            $exists: true
 
         },
         status: {
             $type: "string",
-            $exist: true
+            $exists: true
         },
         allowComments: {
             $type: "boolean",
-            $exist: true
+            $exists: true
         },
         body: {
             $type: "string",
-            $exist: true
+            $exists: true
         }
 
 
     }
 }
 
+database.Categories = {
+    validator: {
 
+        title: {
+            $type: "string",
+            $exists: true
+        }
+    }
+};
 
 
 module.exports = database;
