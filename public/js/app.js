@@ -5,6 +5,15 @@
 
 const api = {};
 
+// session token creation
+api.setSessionToken = (token) => {
+    localStorage.setItem('token', token)
+};
+
+// Verify that a route is assecible by a user
+api.verifyUser = (token) => {
+    return localStorage.getItem()
+}
 
 // ----------------------Register API----------------------------
 api.register = () => {
@@ -38,7 +47,7 @@ api.register = () => {
         .then(response => response.json())
         .then((user) => {
             if (user._id) {
-                console.log(user);
+                window.location = '/login'
             } else {
                 const divElement = document.getElementById('wrapper-div')
                 const err = `<div style=" height: 30px; background-color: orangeRed; text-align: center; border-radius : 7px; text-transform: upperCase;margin-bottom: 10px">${user.Error}</div>`
@@ -68,11 +77,13 @@ api.register = () => {
          function loginData(e) {
 
              e.preventDefault()
-
+            
+             //get the required data to send over to the tokens api 
              let email = document.getElementById('InputEmail').value;
              let password = document.getElementById('InputPassword').value;
 
-             fetch("http://localhost:3000/login", {
+            //  Fetch the api/token url and send over the email and password, the response is a token obj.
+             fetch("http://localhost:3000/api/tokens", {
                  method: "POST",
                  headers: {
                      'Accept': 'application/json, text/plain, */*',
@@ -81,24 +92,35 @@ api.register = () => {
                  body: JSON.stringify({ email: email, password: password })
              })
              .then(response => response.json())
-             .then((user) => {
-                 if (user[0]._id) {
-                     console.log(user);
-                 } else {
-
-                     const divElement = document.getElementById('login-form')
-                     const err = `<div style=" height: 30px; background-color: orangeRed; text-align: center; border-radius : 7px; text-transform: upperCase;margin-bottom: 10px">${user.Error}</div>`
-                     divElement.insertAdjacentHTML('afterbegin', err);
-                    
-                        
+             .then((token) => {
+                 if (token._id) {
+                    //  Set the token id to the localStorage
+                     api.setSessionToken(token._id)
+                    //  fetch the user by the userid and set the token id as the header token response should be the user array
+                    fetch(`http://localhost:3000/users?id=${token.userId}`, {
+                        method: "GET",
+                        headers: {
+                            "token": token._id
+                        } 
+                    })
+                    .then(response => response.json())
+                    .then(user => {
+                        if (user[0]._id) {
+                        console.log(user);
+                        } else {
                             // window.location = "/login"  
-                        
-                    
-                    
+                        }
+                    })
+                 } else {
+                     const divElement = document.getElementById('login-form')
+                     const err = `<div style=" height: 30px; background-color: orangeRed; text-align: center; border-radius : 7px; text-transform: upperCase;margin-bottom: 10px">${token.Error}</div>`
+                     divElement.insertAdjacentHTML('afterbegin', err);
                  }
              })
 
          }
+
+    // 
     
 };
 
@@ -106,87 +128,111 @@ api.register = () => {
 // ----------------CREATE POSTS--------------------------
 api.createPost = () => {
 
-    // get the categories from category api and pass them dynamically in the category option.
+    // get the token from the localStorage and Only continue to route if it is available
+    const token = window.localStorage.getItem('token')
 
-    fetch('http://localhost:3000/api/post/allcategory')
-    .then(response => response.json())
-    .then(category => {
-        category.map(element => {
-           const categoryElement = document.getElementById('category')
-            var opt = document.createElement('option');
-            opt.value = element.category;
-            opt.innerHTML = element.category;
-            opt.selected = true;
-            categoryElement.appendChild(opt);
-        })
-    })
-    
-    // 1. get the for by id
-    document.getElementById('post-form').addEventListener('submit', postData);
-
-    document.getElementById('file').addEventListener('change', previewFile)
-   
-   const pixObj = {};
-    function previewFile() {
-        const preview = document.getElementById('img-preview')
-        var file = document.querySelector('input[type=file]').files[0];
-        var reader = new FileReader();
-
-        reader.addEventListener("load", function () {
-            preview.src = reader.result;
-            pixObj.data = reader.result;
-            
-        }, false);
-
-        if (file) {
-            pixObj.name = file.name,
-            pixObj.type = file.type
-            reader.readAsDataURL(file);
-           
-        }
-    }
-
-    // 2.create post data
-    function postData(e) {
-        //3. prevent default form submit
-        e.preventDefault();
-
-        //4. get all the values by id
-        let title = document.getElementById('title').value;
-        let status = document.getElementById('status').value;
-        let category = document.getElementById('category').value;
-        let allowComments = document.getElementById('allowComments').checked;
-        let textBody = document.getElementById('text-body').value;   
-
-        // 5. create the object to be passed to the front end as json
-        const newPost = {
-            title,
-            status,
-            category,
-            allowComments,
-            textBody,
-            file: pixObj
-        };
-
-        // 6. create the fetch api and handle the responses
-        fetch("http://localhost:3000/api/post", {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json, text/plain, */*',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(newPost)
-        })
+    if (token) {
+        // check if the given token is valid
+        fetch(`http://localhost:3000/api/tokens?id=${token}`)
         .then(response => response.json())
-        .then(posts => {
-            if (posts) {
-                window.location = "/posts";
+        .then(token => {
+            if (token._id) {
+
+                // get the categories from category api and pass them dynamically in the category option.
+
+                fetch('http://localhost:3000/api/post/allcategory', {
+                    method: 'GET',
+                    headers: {
+                        'token': token
+                    }
+                })
+                    .then(response => response.json())
+                    .then(category => {
+                        category.map(element => {
+                            const categoryElement = document.getElementById('category')
+                            var opt = document.createElement('option');
+                            opt.value = element.category;
+                            opt.innerHTML = element.category;
+                            opt.selected = true;
+                            categoryElement.appendChild(opt);
+                        })
+                    })
+
+                // 1. get the for by id
+                document.getElementById('post-form').addEventListener('submit', postData);
+
+                document.getElementById('file').addEventListener('change', previewFile)
+
+                const pixObj = {};
+                function previewFile() {
+                    const preview = document.getElementById('img-preview')
+                    var file = document.querySelector('input[type=file]').files[0];
+                    var reader = new FileReader();
+
+                    reader.addEventListener("load", function () {
+                        preview.src = reader.result;
+                        pixObj.data = reader.result;
+
+                    }, false);
+
+                    if (file) {
+                        pixObj.name = file.name,
+                            pixObj.type = file.type
+                        reader.readAsDataURL(file);
+
+                    }
+                }
+
+                // 2.create post data
+                function postData(e) {
+                    //3. prevent default form submit
+                    e.preventDefault();
+
+                    //4. get all the values by id
+                    let title = document.getElementById('title').value;
+                    let status = document.getElementById('status').value;
+                    let category = document.getElementById('category').value;
+                    let allowComments = document.getElementById('allowComments').checked;
+                    let textBody = document.getElementById('text-body').value;
+
+                    // 5. create the object to be passed to the front end as json
+                    const newPost = {
+                        title,
+                        status,
+                        category,
+                        allowComments,
+                        textBody,
+                        file: pixObj
+                    };
+
+                    // 6. create the fetch api and handle the responses
+                    fetch("http://localhost:3000/api/post", {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json, text/plain, */*',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(newPost)
+                    })
+                        .then(response => response.json())
+                        .then(posts => {
+                            if (posts) {
+                                window.location = "/posts";
+                            } else {
+                                window.location = "/api/post"
+                            }
+
+                        })
+                } 
+
             } else {
-                window.location = "/api/post"
+                window.location = '/login'
             }
-           
-        })
-    }     
+        })    
+    } else {
+        window.location = "/login"
+    }
+    
 };
 
 // --------------VIEW POST ------------------------------
