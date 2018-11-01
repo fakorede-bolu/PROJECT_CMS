@@ -284,6 +284,7 @@ api.getPost = () => {
 
         fetch('http://localhost:3000/api/post/allcategory')
         .then(response => response.json())
+        // get all the category and display
         .then(category => {
             categoryReverse = category.reverse();
             categoryReverse.map((element) => {
@@ -297,7 +298,28 @@ api.getPost = () => {
 
                 document.querySelector('#category__list').insertAdjacentHTML('beforeend', category);
             })
-        });
+        })
+        // grab all the comments associated to the post and display
+        fetch(`http://localhost:3000/api/post/allcomments${id}`)
+            .then(response => response.json())
+            .then(comments => {
+                comments.reverse().map(comment => {
+                        // get the user with the comment
+                        // @TODO
+                        // get the blog div id and insert the comment for each
+                        const eachComment = `<div class="media mb-4">
+                                <img class="d-flex mr-3 rounded-circle" src="http://placehold.it/50x50" alt="">
+                                <div class="media-body">
+                                    <h5 class="mt-0">@TODO</h5>
+                                    ${comment.body}
+                                </div>
+                            </div>`
+
+
+
+                        document.getElementById("blog_post").insertAdjacentHTML('beforeend', eachComment)
+                })
+            })
     })
 };
 
@@ -346,9 +368,7 @@ api.allPosts = () => {
                             const id = `"?id=${element._id.toString()}"`
                             td8.innerHTML = `<button onclick = api.delete_post(${id}) class="btn btn-danger">Delete</button>`
                         });
-                    } else {
-                        window.location = '/login'
-                    }
+                    } 
                 })
             } else {
                 window.location = '/login'
@@ -514,6 +534,7 @@ api.delete_post = (id) => {
 
 // Create comment api
 api.comments = () => {
+    console.log('worrrl')
 
     // Get the token from the localStorage
     const token = window.localStorage.getItem('token')
@@ -521,22 +542,22 @@ api.comments = () => {
     // create the add   Comment function to be called on submit
 
     if (token) {
+        console.log('what happened and went wrong')
         // get the comment form id and pass in the function to be called when it is submitted
-        document.getElementById("comment__submit").addEventListener('click', addComment)
-
-        // Get the post id to be sent over as a queryString to the comments url
-        const id = window.location.search;
-        const url = `http://localhost:3000/api/post/comments${id}`
-
-        // Get the value of the comment body
-        const comment = document.getElementById("post__comment").value
+        document.getElementById("comment__form").addEventListener('submit', addComment)
 
         function addComment(e) {
-
+            // Get the value of the comment body
+            const comment = document.getElementById("post__comment").value
+           
+            // Get the post id to be sent over as a queryString to the comments url
+            const id = window.location.search;
+            
             //prevent default form submit
             e.preventDefault();
+            
             // Fetch the url  and send over the comment inputed by a login user {send the token in the header}
-            fetch(url, {
+            fetch(`http://localhost:3000/api/post/comments${id}`, {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json, text/plain, */*',
@@ -545,26 +566,13 @@ api.comments = () => {
                 },
                 body: JSON.stringify({ comment: comment })
             })
-                .then(response => {
-                    if (response.status === 200) {
-                        response.json().then(comments => {
-                                // get the blog div id and insert the comment for each
-                                const eachComment = `<div class="media mb-4">
-                                            <img class="d-flex mr-3 rounded-circle" src="http://placehold.it/50x50" alt="">
-                                            <div class="media-body">
-                                                <h5 class="mt-0">@TODO</h5>
-                                                ${comments.body}
-                                            </div>
-                                        </div>`
-
-                                        
-                                
-                                document.getElementById("blog_post").insertAdjacentHTML('beforeend', eachComment)
-                        })
-                    } else {
-                        window.location = "/login"
-                    }
-                })
+            .then(response => {
+                console.log(response);
+                if (response.status === 200) {
+                    console.log(response)
+                    window.location = `/post${id}`
+                }
+            })
         }
     } else {
         window.location = "/login"
